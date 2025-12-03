@@ -3,33 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BVC Alarm UI - Custom Cut</title>
+    <title>BVC Alarm UI - Large TV Scale</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap');
 
         :root {
             --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.18);
             
-            /* --- COLORS & GRADIENTS --- */
-            /* New Gradient Colors */
-            --segment-on-grad-start: #9ee9ff; /* Top color */
-            --segment-on-grad-end: #61b3f9;   /* Bottom color */
+            /* --- COLORS --- */
+            --segment-on-grad-start: #9ee9ff; 
+            --segment-on-grad-end: #61b3f9;   
+            --segment-on-shadow: 0 0 25px rgba(128, 205, 254, 0.3); /* Increased shadow radius for size */
+            --segment-off: rgba(255, 255, 255, 0.02);
             
-            /* GLOW CONTROL: Lower opacity here to reduce glow */
-            --segment-on-shadow: 0 0 15px rgba(128, 205, 254, 0.3); 
-
-            /* Inactive segment color */
-            --segment-off: rgba(255, 255, 255, 0.04);
+            /* Default background (will be overridden by JS) */
+            --default-bg: linear-gradient(135deg, #0f5c9e 0%, #003666 100%);
             
-            --blue-bg: radial-gradient(circle at 10% 90%, rgba(255, 219, 219, 0.4) 0%, rgba(45, 114, 185, 0) 40%),
-                       linear-gradient(135deg, #0f5c9e 0%, #003666 100%);
-            
-            /* --- GEOMETRY CONTROLS --- */
-            --seg-th: 14px;  /* Thickness of the segment */
-            
-            /* DIAL THIS UP OR DOWN to change the pointiness of the tips */
-            --cut-size: 7px; 
+            /* --- SCALED GEOMETRY (approx 1.6x larger) --- */
+            --seg-th: 22px;   /* Thicker segments */
+            --cut-size: 11px; /* Larger cuts */
         }
 
         * {
@@ -41,26 +34,28 @@
 
         body {
             font-family: 'Poppins', sans-serif; 
-            background: var(--blue-bg);
+            background: var(--default-bg);
+            background-size: 100% 100%;
+            transition: background 1s ease;
             height: 100vh;
             width: 100vw;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            color: white;            
+            color: white;
         }
 
-        /* Ambient Glow */
+        /* Ambient Glow - Scaled */
         body::before {
             content: '';
             position: absolute;
             bottom: -10%;
             left: -10%;
-            width: 50vw;
-            height: 50vw;
+            width: 60vw;
+            height: 60vw;
             background: radial-gradient(circle, rgba(255, 200, 200, 0.15) 0%, rgba(255,255,255,0) 70%);
-            filter: blur(100px);
+            filter: blur(150px);
             z-index: -1;
         }
 
@@ -68,13 +63,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 25px; 
-            width: 600px;
+            gap: 40px; 
+            width: 1000px; /* Scaled from 600px */
         }
 
-        /* Typography */
+        /* Typography - Scaled */
         .header-text {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             text-align: center;
             width: 100%;
         }
@@ -85,43 +80,43 @@
         
         #greeting-text {
             color: #ffffff;
-            font-size: 2rem;
-            font-weight: 700; /* Poppins Bold */
-            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            margin-bottom: 5px;
+            font-size: 3.2rem; /* Scaled Up */
+            font-weight: 700; 
+            text-shadow: 0 6px 30px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
         }
 
         #date-text {
-            color: #99daff; /* Light Blue Text */
-            font-size: 1.4rem;
-            font-weight: 600; /* Poppins Semi-bold */
-            margin-bottom: 30px;
+            color: #99daff; 
+            font-size: 2.2rem; /* Scaled Up */
+            font-weight: 600; 
+            margin-bottom: 25px; 
         }
 
-        /* Glass Clock Face */
+        /* Glass Clock Face - Scaled */
         .clock-face {
             width: 100%;
-            height: 250px;
+            height: 400px; /* Scaled from 250px */
             background: var(--glass-bg);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-radius: 40px;
-            border: 1px solid var(--glass-border); 
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            border-radius: 64px;
+            border: 2px solid var(--glass-border); 
             box-shadow: 
-                inset 0 1px 1px rgba(255,255,255,0.1),
-                0 20px 20px rgba(0, 0, 0, 0.10),
-                0 0 15px rgba(255, 255, 255, 0.15);
+                inset 0 1px 1px rgba(255,255,255,0.2),
+                0 30px 60px rgba(0, 0, 0, 0.15),
+                0 0 25px rgba(255, 255, 255, 0.15);
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 30px;
+            gap: 48px; /* Larger gap */
             position: relative;
         }
 
-        /* --- 7-Segment Digit Logic --- */
+        /* --- 7-Segment Digit Logic (Scaled) --- */
         .digit {
-            width: 86px;
-            height: 148px;
+            width: 140px;  /* Scaled */
+            height: 240px; /* Scaled */
             position: relative;
             display: flex;
             align-items: center; 
@@ -131,7 +126,6 @@
             position: absolute;
             background: var(--segment-off);
             transition: all 0.2s ease;
-            /* No border-radius here because clip-path handles the shape */
         }
 
         .segment.on {
@@ -140,14 +134,13 @@
             z-index: 2; 
         }
 
-        /* --- CLIP PATH GEOMETRY --- */
-        /* Using CSS Variables to control the cut angles */
-
+        /* --- GEOMETRY & POSITIONS (Recalculated for 1.6x size) --- */
+        
         /* Horizontal Segments */
         .h-seg {
             height: var(--seg-th);
-            width: 60px; 
-            left: 13px;  
+            width: 96px; /* 140px digit width - (22px * 2) margins approx */
+            left: 22px;  
             clip-path: polygon(
                 var(--cut-size) 0, 
                 calc(100% - var(--cut-size)) 0, 
@@ -161,7 +154,7 @@
         /* Vertical Segments */
         .v-seg {
             width: var(--seg-th);
-            height: 60px; 
+            height: 96px; 
             clip-path: polygon(
                 50% 0, 
                 100% var(--cut-size), 
@@ -172,29 +165,30 @@
             );
         }
 
-        /* --- Positioning --- */
+        /* Positions */
         .top    { top: 0; }
-        .mid    { position: relative; margin: 0 auto; left: auto; } /* Centered flex */
+        .mid    { position: relative; margin: 0 auto; left: auto; top: 0; } 
         .bot    { bottom: 0; }
         
-        .top-l  { top: 11px; left: 0; }
-        .top-r  { top: 11px; right: 0; }
-        .bot-l  { bottom: 11px; left: 0; }
-        .bot-r  { bottom: 11px; right: 0; }
+        /* Vertical Offsets (Adjusted for tighter joints) */
+        .top-l  { top: 18px; left: 0; }
+        .top-r  { top: 18px; right: 0; }
+        .bot-l  { bottom: 18px; left: 0; }
+        .bot-r  { bottom: 18px; right: 0; }
 
 
-        /* Colon Separator */
+        /* Colon Separator - Scaled */
         .separator {
             display: flex;
             flex-direction: column;
-            gap: 30px;
-            padding-top: 10px;
+            gap: 45px;
+            padding-top: 15px;
         }
         .dot {
-            width: 14px;
-            height: 14px;
+            width: 22px;
+            height: 22px;
             background: linear-gradient(to bottom, var(--segment-on-grad-start), var(--segment-on-grad-end));
-            border-radius: 50%; /* Dots remain round/soft */
+            border-radius: 50%; 
             box-shadow: var(--segment-on-shadow);
             animation: pulse 1s infinite;
         }
@@ -204,17 +198,17 @@
             50% { opacity: 0.4; }
         }
 
-        /* Logo Section */
+        /* Logo Section - Scaled */
         .logo-container {
             width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 50px;
+            margin-top: 60px;
         }
 
         .logo-container img {
-            max-width: 200px;
+            max-width: 320px; /* Scaled up */
             height: auto;
             display: block;
             filter: brightness(0) invert(1); 
@@ -284,6 +278,33 @@
     </div>
 
     <script>
+        // ========================================
+        // Background Gradients by Time
+        // ========================================
+        const BACKGROUND_GRADIENTS = {
+            dawn: 'linear-gradient(135deg, #2e2baf 0%, #1b2d77 50%, #102a58 100%)',      // 7am-8am
+            day: 'linear-gradient(135deg, #2e2baf 0%, #1b2d77 50%, #102a58 100%)',       // 8am-6pm
+            night: 'linear-gradient(135deg, #2e2baf 0%, #1b2d77 50%, #102a58 100%)'      // 6pm-7am
+        };
+
+        function setTimeBasedBackground(hour) {
+            let gradient;
+            
+            if (hour >= 7 && hour < 8) {
+                // Dawn: 7am-8am
+                gradient = BACKGROUND_GRADIENTS.dawn;
+            } else if (hour >= 8 && hour < 18) {
+                // Day: 8am-6pm
+                gradient = BACKGROUND_GRADIENTS.day;
+            } else {
+                // Night: 6pm-7am
+                gradient = BACKGROUND_GRADIENTS.night;
+            }
+            
+            document.body.style.background = gradient;
+            document.body.style.backgroundSize = '100% 100%';
+        }
+
         const digitMap = {
             '0': [1, 1, 1, 0, 1, 1, 1],
             '1': [0, 0, 1, 0, 0, 1, 0],
@@ -297,8 +318,6 @@
             '9': [1, 1, 1, 1, 0, 1, 1],
             'off': [0, 0, 0, 0, 0, 0, 0]
         };
-
-        const segmentsOrder = ['top', 'top-l', 'top-r', 'mid', 'bot-l', 'bot-r', 'bot'];
 
         function setDigit(digitId, value) {
             const digitEl = document.getElementById(digitId);
@@ -317,16 +336,16 @@
         function updateClock() {
             // Get current time in Calgary
             const now = new Date();
-            const timeOptions = { timeZone: "America/Edmonton", hour12: false, hour: '2-digit', minute: '2-digit' };
-            const timeString = now.toLocaleTimeString('en-US', timeOptions); 
+            // Use 24-hour format logic for background/greetings calculation
+            const timeOptions24 = { timeZone: "America/Edmonton", hour12: false, hour: 'numeric', minute: 'numeric' };
+            const timeString24 = now.toLocaleTimeString('en-US', timeOptions24); 
             
-            // Get Date String
-            const dateOptions = { weekday: 'long', month: 'long', day: 'numeric', timeZone: "America/Edmonton" };
-            const dateString = now.toLocaleDateString('en-US', dateOptions);
+            let [hoursStr, minutesStr] = timeString24.split(':');
+            let h = parseInt(hoursStr, 10);
+            
+            // --- Update Background based on Calgary Hour ---
+            setTimeBasedBackground(h);
 
-            let [hours, minutes] = timeString.split(':');
-            let h = parseInt(hours, 10);
-            
             // --- Greeting Logic ---
             let greetingPart = "Good morning, Calgary!";
             if (h >= 12 && h < 18) {
@@ -335,7 +354,11 @@
                 greetingPart = "Good evening, Calgary!";
             }
 
-            // --- 12-Hour Logic ---
+            // --- Date String ---
+            const dateOptions = { weekday: 'long', month: 'long', day: 'numeric', timeZone: "America/Edmonton" };
+            const dateString = now.toLocaleDateString('en-US', dateOptions);
+
+            // --- 12-Hour Logic for Display ---
             let displayHour = h % 12;
             displayHour = displayHour ? displayHour : 12; // Handle 0 as 12
 
@@ -355,12 +378,15 @@
                 d2Val = hStr[1];
             }
 
-            const minutesStr = minutes.padStart(2, '0');
+            // Ensure minutes have leading zero
+            // (Re-fetching minutes in 2-digit format to be safe)
+            const minOptions = { timeZone: "America/Edmonton", minute: '2-digit' };
+            const finalMin = now.toLocaleTimeString('en-US', { timeZone: "America/Edmonton", minute: '2-digit' }).slice(-2);
 
             setDigit('d1', d1Val);
             setDigit('d2', d2Val);
-            setDigit('d3', minutesStr[0]);
-            setDigit('d4', minutesStr[1]);
+            setDigit('d3', finalMin[0]);
+            setDigit('d4', finalMin[1]);
         }
 
         updateClock();
