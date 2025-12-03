@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BVC Alarm UI - Custom Cut</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap');
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            
+            /* --- COLORS & GRADIENTS --- */
+            /* New Gradient Colors */
+            --segment-on-grad-start: #9ee9ff; /* Top color */
+            --segment-on-grad-end: #61b3f9;   /* Bottom color */
+            
+            /* GLOW CONTROL: Lower opacity here to reduce glow */
+            --segment-on-shadow: 0 0 15px rgba(128, 205, 254, 0.3); 
+
+            /* Inactive segment color */
+            --segment-off: rgba(255, 255, 255, 0.04);
+            
+            --blue-bg: radial-gradient(circle at 10% 90%, rgba(255, 219, 219, 0.4) 0%, rgba(45, 114, 185, 0) 40%),
+                       linear-gradient(135deg, #0f5c9e 0%, #003666 100%);
+            
+            /* --- GEOMETRY CONTROLS --- */
+            --seg-th: 14px;  /* Thickness of the segment */
+            
+            /* DIAL THIS UP OR DOWN to change the pointiness of the tips */
+            --cut-size: 7px; 
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif; 
+            background: var(--blue-bg);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: white;            
+        }
+
+        /* Ambient Glow */
+        body::before {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(255, 200, 200, 0.15) 0%, rgba(255,255,255,0) 70%);
+            filter: blur(100px);
+            z-index: -1;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px; 
+            width: 600px;
+        }
+
+        /* Typography */
+        .header-text {
+            margin-bottom: 10px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .header-text span {
+            display: block;
+        }
+        
+        #greeting-text {
+            color: #ffffff;
+            font-size: 2rem;
+            font-weight: 700; /* Poppins Bold */
+            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            margin-bottom: 5px;
+        }
+
+        #date-text {
+            color: #99daff; /* Light Blue Text */
+            font-size: 1.4rem;
+            font-weight: 600; /* Poppins Semi-bold */
+            margin-bottom: 30px;
+        }
+
+        /* Glass Clock Face */
+        .clock-face {
+            width: 100%;
+            height: 250px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 40px;
+            border: 1px solid var(--glass-border); 
+            box-shadow: 
+                inset 0 1px 1px rgba(255,255,255,0.1),
+                0 20px 20px rgba(0, 0, 0, 0.10),
+                0 0 15px rgba(255, 255, 255, 0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            position: relative;
+        }
+
+        /* --- 7-Segment Digit Logic --- */
+        .digit {
+            width: 86px;
+            height: 148px;
+            position: relative;
+            display: flex;
+            align-items: center; 
+        }
+
+        .segment {
+            position: absolute;
+            background: var(--segment-off);
+            transition: all 0.2s ease;
+            /* No border-radius here because clip-path handles the shape */
+        }
+
+        .segment.on {
+            background: linear-gradient(to bottom, var(--segment-on-grad-start), var(--segment-on-grad-end));
+            box-shadow: var(--segment-on-shadow);
+            z-index: 2; 
+        }
+
+        /* --- CLIP PATH GEOMETRY --- */
+        /* Using CSS Variables to control the cut angles */
+
+        /* Horizontal Segments */
+        .h-seg {
+            height: var(--seg-th);
+            width: 60px; 
+            left: 13px;  
+            clip-path: polygon(
+                var(--cut-size) 0, 
+                calc(100% - var(--cut-size)) 0, 
+                100% 50%, 
+                calc(100% - var(--cut-size)) 100%, 
+                var(--cut-size) 100%, 
+                0 50%
+            );
+        }
+
+        /* Vertical Segments */
+        .v-seg {
+            width: var(--seg-th);
+            height: 60px; 
+            clip-path: polygon(
+                50% 0, 
+                100% var(--cut-size), 
+                100% calc(100% - var(--cut-size)), 
+                50% 100%, 
+                0 calc(100% - var(--cut-size)), 
+                0 var(--cut-size)
+            );
+        }
+
+        /* --- Positioning --- */
+        .top    { top: 0; }
+        .mid    { position: relative; margin: 0 auto; left: auto; } /* Centered flex */
+        .bot    { bottom: 0; }
+        
+        .top-l  { top: 11px; left: 0; }
+        .top-r  { top: 11px; right: 0; }
+        .bot-l  { bottom: 11px; left: 0; }
+        .bot-r  { bottom: 11px; right: 0; }
+
+
+        /* Colon Separator */
+        .separator {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            padding-top: 10px;
+        }
+        .dot {
+            width: 14px;
+            height: 14px;
+            background: linear-gradient(to bottom, var(--segment-on-grad-start), var(--segment-on-grad-end));
+            border-radius: 50%; /* Dots remain round/soft */
+            box-shadow: var(--segment-on-shadow);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Logo Section */
+        .logo-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+        }
+
+        .logo-container img {
+            max-width: 200px;
+            height: auto;
+            display: block;
+            filter: brightness(0) invert(1); 
+            opacity: 0.85;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-text">
+            <span id="greeting-text">Loading...</span>
+            <span id="date-text"></span>
+        </div>
+
+        <div class="clock-face">
+            <div class="digit" id="d1">
+                <div class="segment h-seg top"></div>
+                <div class="segment v-seg top-l"></div>
+                <div class="segment v-seg top-r"></div>
+                <div class="segment h-seg mid"></div>
+                <div class="segment v-seg bot-l"></div>
+                <div class="segment v-seg bot-r"></div>
+                <div class="segment h-seg bot"></div>
+            </div>
+
+            <div class="digit" id="d2">
+                <div class="segment h-seg top"></div>
+                <div class="segment v-seg top-l"></div>
+                <div class="segment v-seg top-r"></div>
+                <div class="segment h-seg mid"></div>
+                <div class="segment v-seg bot-l"></div>
+                <div class="segment v-seg bot-r"></div>
+                <div class="segment h-seg bot"></div>
+            </div>
+
+            <div class="separator">
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+
+            <div class="digit" id="d3">
+                <div class="segment h-seg top"></div>
+                <div class="segment v-seg top-l"></div>
+                <div class="segment v-seg top-r"></div>
+                <div class="segment h-seg mid"></div>
+                <div class="segment v-seg bot-l"></div>
+                <div class="segment v-seg bot-r"></div>
+                <div class="segment h-seg bot"></div>
+            </div>
+
+            <div class="digit" id="d4">
+                <div class="segment h-seg top"></div>
+                <div class="segment v-seg top-l"></div>
+                <div class="segment v-seg top-r"></div>
+                <div class="segment h-seg mid"></div>
+                <div class="segment v-seg bot-l"></div>
+                <div class="segment v-seg bot-r"></div>
+                <div class="segment h-seg bot"></div>
+            </div>
+        </div>
+
+        <div class="logo-container">
+            <img src="assets/logo.svg" alt="Bow Valley College Logo">
+        </div>
+    </div>
+
+    <script>
+        const digitMap = {
+            '0': [1, 1, 1, 0, 1, 1, 1],
+            '1': [0, 0, 1, 0, 0, 1, 0],
+            '2': [1, 0, 1, 1, 1, 0, 1],
+            '3': [1, 0, 1, 1, 0, 1, 1],
+            '4': [0, 1, 1, 1, 0, 1, 0],
+            '5': [1, 1, 0, 1, 0, 1, 1],
+            '6': [1, 1, 0, 1, 1, 1, 1],
+            '7': [1, 0, 1, 0, 0, 1, 0],
+            '8': [1, 1, 1, 1, 1, 1, 1],
+            '9': [1, 1, 1, 1, 0, 1, 1],
+            'off': [0, 0, 0, 0, 0, 0, 0]
+        };
+
+        const segmentsOrder = ['top', 'top-l', 'top-r', 'mid', 'bot-l', 'bot-r', 'bot'];
+
+        function setDigit(digitId, value) {
+            const digitEl = document.getElementById(digitId);
+            const segments = digitEl.querySelectorAll('.segment');
+            const map = digitMap[value];
+
+            segments.forEach((seg, index) => {
+                if (map[index] === 1) {
+                    seg.classList.add('on');
+                } else {
+                    seg.classList.remove('on');
+                }
+            });
+        }
+
+        function updateClock() {
+            // Get current time in Calgary
+            const now = new Date();
+            const timeOptions = { timeZone: "America/Edmonton", hour12: false, hour: '2-digit', minute: '2-digit' };
+            const timeString = now.toLocaleTimeString('en-US', timeOptions); 
+            
+            // Get Date String
+            const dateOptions = { weekday: 'long', month: 'long', day: 'numeric', timeZone: "America/Edmonton" };
+            const dateString = now.toLocaleDateString('en-US', dateOptions);
+
+            let [hours, minutes] = timeString.split(':');
+            let h = parseInt(hours, 10);
+            
+            // --- Greeting Logic ---
+            let greetingPart = "Good morning, Calgary!";
+            if (h >= 12 && h < 18) {
+                greetingPart = "Good afternoon, Calgary!";
+            } else if (h >= 18) {
+                greetingPart = "Good evening, Calgary!";
+            }
+
+            // --- 12-Hour Logic ---
+            let displayHour = h % 12;
+            displayHour = displayHour ? displayHour : 12; // Handle 0 as 12
+
+            // Update Text Elements
+            document.getElementById('greeting-text').textContent = greetingPart;
+            document.getElementById('date-text').textContent = `It's ${dateString}`;
+
+            // --- Digit Logic (Hide leading zero) ---
+            let d1Val, d2Val;
+            
+            if (displayHour < 10) {
+                d1Val = 'off'; 
+                d2Val = displayHour.toString();
+            } else {
+                const hStr = displayHour.toString();
+                d1Val = hStr[0];
+                d2Val = hStr[1];
+            }
+
+            const minutesStr = minutes.padStart(2, '0');
+
+            setDigit('d1', d1Val);
+            setDigit('d2', d2Val);
+            setDigit('d3', minutesStr[0]);
+            setDigit('d4', minutesStr[1]);
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+
+    </script>
+</body>
+</html>
