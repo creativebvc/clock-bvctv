@@ -14,207 +14,158 @@
             /* --- COLORS --- */
             --segment-on-grad-start: #9ee9ff; 
             --segment-on-grad-end: #61b3f9;   
-            --segment-on-shadow: 0 0 25px rgba(128, 205, 254, 0.3); /* Increased shadow radius for size */
+            --segment-on-shadow: 0 0 25px rgba(128, 205, 254, 0.3);
             --segment-off: rgba(255, 255, 255, 0.02);
             
-            /* Default background (will be overridden by JS) */
+            /* Default background */
             --default-bg: linear-gradient(135deg, #0f5c9e 0%, #003666 100%);
             
-            /* --- SCALED GEOMETRY (approx 1.6x larger) --- */
-            --seg-th: 22px;   /* Thicker segments */
-            --cut-size: 11px; /* Larger cuts */
+            /* --- SCALED GEOMETRY --- */
+            --seg-th: 22px;   
+            --cut-size: 11px;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
 
         body {
             font-family: 'Poppins', sans-serif; 
             background: var(--default-bg);
             background-size: 100% 100%;
             transition: background 1s ease;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            color: white;
+            height: 100vh; width: 100vw;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; color: white;
         }
 
-        /* Ambient Glow - Scaled */
         body::before {
-            content: '';
-            position: absolute;
-            bottom: -10%;
-            left: -10%;
-            width: 60vw;
-            height: 60vw;
+            content: ''; position: absolute; bottom: -10%; left: -10%;
+            width: 60vw; height: 60vw;
             background: radial-gradient(circle, rgba(255, 200, 200, 0.15) 0%, rgba(255,255,255,0) 70%);
-            filter: blur(150px);
-            z-index: -1;
+            filter: blur(150px); z-index: -1;
         }
 
         .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 40px; 
-            width: 1000px; /* Scaled from 600px */
+            display: flex; flex-direction: column; align-items: center;
+            /* gap: 40px removed */
+            width: 1000px;
         }
 
-        /* Typography - Scaled */
         .header-text {
-            margin-bottom: 15px;
-            text-align: center;
-            width: 100%;
+            margin-bottom: 15px; text-align: center; width: 100%;
+            /* Added margin to replace container gap */
+            margin-bottom: 40px; 
         }
 
-        .header-text span {
-            display: block;
-        }
+        .header-text span { display: block; }
         
         #greeting-text {
-            color: #ffffff;
-            font-size: 3.2rem; /* Scaled Up */
-            font-weight: 700; 
-            text-shadow: 0 6px 30px rgba(0,0,0,0.2);
-            margin-bottom: 10px;
+            color: #ffffff; font-size: 3.2rem; font-weight: 700; 
+            text-shadow: 0 6px 30px rgba(0,0,0,0.2); margin-bottom: 10px;
         }
 
         #date-text {
-            color: #99daff; 
-            font-size: 2.2rem; /* Scaled Up */
-            font-weight: 600; 
-            margin-bottom: 25px; 
+            color: #99daff; font-size: 2.2rem; font-weight: 600; margin-bottom: 25px; 
         }
 
-        /* Glass Clock Face - Scaled */
+        /* Glass Clock Face */
         .clock-face {
-            width: 100%;
-            height: 400px; /* Scaled from 250px */
+            width: 100%; height: 400px;
             background: var(--glass-bg);
-            backdrop-filter: blur(35px);
-            -webkit-backdrop-filter: blur(35px);
+            backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px);
             border-radius: 64px;
             border: 2px solid var(--glass-border); 
-            box-shadow: 
-                inset 0 1px 1px rgba(255,255,255,0.2),
-                0 30px 60px rgba(0, 0, 0, 0.15),
-                0 0 25px rgba(255, 255, 255, 0.15);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 48px; /* Larger gap */
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.2), 0 30px 60px rgba(0, 0, 0, 0.15), 0 0 25px rgba(255, 255, 255, 0.15);
+            
+            display: flex; justify-content: center; align-items: center;
+            
+            /* FIX 1: Removed gap: 48px (Not supported on TV) */
             position: relative;
         }
 
-        /* --- 7-Segment Digit Logic (Scaled) --- */
+        /* --- 7-Segment Digit Logic --- */
         .digit {
-            width: 140px;  /* Scaled */
-            height: 240px; /* Scaled */
-            position: relative;
-            display: flex;
-            align-items: center; 
+            width: 140px; height: 240px;
+            position: relative; display: flex; align-items: center; 
+            
+            /* FIX 2: Added margin to replace gap */
+            margin-right: 48px;
         }
+
+        /* Remove margin from the very last digit */
+        .digit:last-child { margin-right: 0; }
 
         .segment {
-            position: absolute;
-            background: var(--segment-off);
+            position: absolute; background: var(--segment-off);
             transition: all 0.2s ease;
+            
+            /* TV FIX: Forces hardware acceleration to prevent flickering */
+            transform: translateZ(0); 
+            will-change: background, box-shadow;
         }
 
         .segment.on {
             background: linear-gradient(to bottom, var(--segment-on-grad-start), var(--segment-on-grad-end));
-            box-shadow: var(--segment-on-shadow);
-            z-index: 2; 
+            box-shadow: var(--segment-on-shadow); z-index: 2; 
         }
 
-        /* --- GEOMETRY & POSITIONS (Recalculated for 1.6x size) --- */
-        
-        /* Horizontal Segments */
+        /* --- GEOMETRY --- */
         .h-seg {
-            height: var(--seg-th);
-            width: 96px; /* 140px digit width - (22px * 2) margins approx */
-            left: 22px;  
-            clip-path: polygon(
-                var(--cut-size) 0, 
-                calc(100% - var(--cut-size)) 0, 
-                100% 50%, 
-                calc(100% - var(--cut-size)) 100%, 
-                var(--cut-size) 100%, 
-                0 50%
-            );
+            height: var(--seg-th); width: 96px; left: 22px;  
+            clip-path: polygon(var(--cut-size) 0, calc(100% - var(--cut-size)) 0, 100% 50%, calc(100% - var(--cut-size)) 100%, var(--cut-size) 100%, 0 50%);
         }
-
-        /* Vertical Segments */
         .v-seg {
-            width: var(--seg-th);
-            height: 96px; 
-            clip-path: polygon(
-                50% 0, 
-                100% var(--cut-size), 
-                100% calc(100% - var(--cut-size)), 
-                50% 100%, 
-                0 calc(100% - var(--cut-size)), 
-                0 var(--cut-size)
-            );
+            width: var(--seg-th); height: 96px; 
+            clip-path: polygon(50% 0, 100% var(--cut-size), 100% calc(100% - var(--cut-size)), 50% 100%, 0 calc(100% - var(--cut-size)), 0 var(--cut-size));
         }
 
-        /* Positions */
         .top    { top: 0; }
         .mid    { position: relative; margin: 0 auto; left: auto; top: 0; } 
         .bot    { bottom: 0; }
-        
-        /* Vertical Offsets (Adjusted for tighter joints) */
         .top-l  { top: 18px; left: 0; }
         .top-r  { top: 18px; right: 0; }
         .bot-l  { bottom: 18px; left: 0; }
         .bot-r  { bottom: 18px; right: 0; }
 
-
-        /* Colon Separator - Scaled */
+        /* Colon Separator */
         .separator {
-            display: flex;
-            flex-direction: column;
-            gap: 45px;
+            display: flex; flex-direction: column;
+            
+            /* FIX 3: Removed gap: 45px inside separator */
+            /* FIX 4: Added margin-right to separate it from the next digit */
+            margin-right: 48px;
+            
             padding-top: 15px;
         }
+        
         .dot {
-            width: 22px;
-            height: 22px;
+            width: 22px; height: 22px;
             background: linear-gradient(to bottom, var(--segment-on-grad-start), var(--segment-on-grad-end));
             border-radius: 50%; 
             box-shadow: var(--segment-on-shadow);
             animation: pulse 1s infinite;
+            
+            /* FIX 5: Added margin-bottom to replace internal gap */
+            margin-bottom: 45px;
         }
+        
+        /* Remove margin from bottom dot */
+        .dot:last-child { margin-bottom: 0; }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.4; }
         }
 
-        /* Logo Section - Scaled */
+        /* Logo Section */
         .logo-container {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100%; display: flex; justify-content: center; align-items: center;
             margin-top: 60px;
         }
 
         .logo-container img {
-            max-width: 320px; /* Scaled up */
-            height: auto;
-            display: block;
-            filter: brightness(0) invert(1); 
-            opacity: 0.85;
+            max-width: 320px; height: auto; display: block;
+            filter: brightness(0) invert(1); opacity: 0.85;
         }
-
     </style>
 </head>
 <body>
@@ -395,4 +346,5 @@
     </script>
 </body>
 </html>
+
 
